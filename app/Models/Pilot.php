@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Notifications\Notifiable;
 
 class Pilot extends Model
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     // Define statuses
     const STATUS_AVAILABLE = 'available';
@@ -18,7 +19,13 @@ class Pilot extends Model
     const STATUS_ELITE = 'elite';
 
     // Fillable attributes
-    protected $fillable = ['name', 'status', 'current_location'];
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'status',
+        'current_location',
+    ];
 
     // Define the available scope
     public function scopeAvailable(Builder $query): Builder
@@ -34,9 +41,22 @@ class Pilot extends Model
         return $query->orderByRaw("ST_Distance(current_location, ST_GeomFromText(?))", [$location]);
     }
 
+    // Define the relationship with Payout
+    public function payouts()
+    {
+        return $this->hasMany(Payout::class);
+    }
+
+    // Define the relationship with Delivery
+    public function deliveries()
+    {
+        return $this->hasMany(Delivery::class);
+    }
+
     // Define the relationship with PilotPerformance
     public function performance()
     {
         return $this->hasOne(PilotPerformance::class);
     }
 }
+
